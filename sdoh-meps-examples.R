@@ -215,11 +215,23 @@ fyc21_extended <- fyc21 %>%
   mutate(GENHLTH_SIMPLE = forcats::fct_inorder(GENHLTH_SIMPLE))
    
 # Sample size check
-sample_size_check <-  fyc21_extended %>% 
+sample_size_check_hsgrad <-  fyc21_extended %>% 
   filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
   group_by(HIDEG_DSC, RACETHX_DSC) %>% 
   summarize(sample_n = n()) %>%
-  write_csv(file="./outputs/data/sample_size_check.csv")
+  write_csv(file="./outputs/data/sample_size_check_hsgrad.csv")
+
+sample_size_check_transit <-  fyc21_extended %>% 
+  filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
+  group_by(SDNOTRANS_DSC, RACETHX_DSC) %>% 
+  summarize(sample_n = n()) %>%
+  write_csv(file="./outputs/data/sample_size_check_transit.csv")
+
+sample_size_check_housing <-  fyc21_extended %>% 
+  filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
+  group_by(SDAFRDHOME_DSC_2, RACETHX_DSC) %>% 
+  summarize(sample_n = n()) %>%
+  write_csv(file="./outputs/data/sample_size_check_housing.csv")
 
 # Not enough sample to report "Non-Hispanic Other Race or Multiple Race" breakout (n = 53, needs to be more than 60 per MEPS guidelines)
 
