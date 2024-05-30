@@ -1,0 +1,13 @@
+RACETHX_DSC,SDNOTRANS_DSC,GENHLTH_SIMPLE,n,n_se,n_low,n_upp,rse
+Hispanic,Yes,"Self-reported general health status on VR-12 is ""Excellent"", ""Very good"", or ""Good""",0.7384929615449826,0.04242729342753347,0.6469573211878872,0.8131499894934572,0.057451181848466634
+Hispanic,Yes,"Self-reported general health status on VR-12 is ""Fair"" or ""Poor""",0.2543772141363678,0.04276429746720116,0.179575206225104,0.34715350283344065,0.1681137110192419
+Hispanic,No,"Self-reported general health status on VR-12 is ""Excellent"", ""Very good"", or ""Good""",0.8733523399084133,0.009281112638968872,0.8539290652734668,0.8905239866909993,0.010626996934527207
+Hispanic,No,"Self-reported general health status on VR-12 is ""Fair"" or ""Poor""",0.10863538865219885,0.008704800877367675,0.09264903493125641,0.12699407673386243,0.08012859331903799
+Non-Hispanic White Only,Yes,"Self-reported general health status on VR-12 is ""Excellent"", ""Very good"", or ""Good""",0.6361339695326291,0.029492670913417004,0.5763502557280998,0.6919898065336131,0.04636235812887876
+Non-Hispanic White Only,Yes,"Self-reported general health status on VR-12 is ""Fair"" or ""Poor""",0.33718015756524555,0.02859191256153649,0.2833874571952267,0.3955476824394241,0.0847971386216695
+Non-Hispanic White Only,No,"Self-reported general health status on VR-12 is ""Excellent"", ""Very good"", or ""Good""",0.8716387303834963,0.005617931199529102,0.8601679690916814,0.8822972772800127,0.006445251918828081
+Non-Hispanic White Only,No,"Self-reported general health status on VR-12 is ""Fair"" or ""Poor""",0.10307100114380885,0.005145822974411963,0.09337306640656381,0.11364992161078974,0.04992503145702739
+Non-Hispanic Black Only,Yes,"Self-reported general health status on VR-12 is ""Excellent"", ""Very good"", or ""Good""",0.6553203590455591,0.05381140406184197,0.5432790091839028,0.7524025555237209,0.08211465326701517
+Non-Hispanic Black Only,Yes,"Self-reported general health status on VR-12 is ""Fair"" or ""Poor""",0.31154459403618084,0.050506119512381646,0.221587766965032,0.41839182162392574,0.16211521714453558
+Non-Hispanic Black Only,No,"Self-reported general health status on VR-12 is ""Excellent"", ""Very good"", or ""Good""",0.8379782034481208,0.012004466292738904,0.812937951956943,0.860242796794196,0.01432551138364078
+Non-Hispanic Black Only,No,"Self-reported general health status on VR-12 is ""Fair"" or ""Poor""",0.1300588153566142,0.010882099460035634,0.11009552317408097,0.15301955063964545,0.0836706026438693

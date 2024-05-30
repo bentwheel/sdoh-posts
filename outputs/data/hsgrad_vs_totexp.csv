@@ -1,0 +1,7 @@
+RACETHX_DSC,HIDEG_DSC,n,n_se,n_low,n_upp,rse
+Hispanic,Did not complete high school,268,35.08342766956433,202,341,0.1309083121998669
+Hispanic,Completed GED or high school,627,72.46998086995485,510,796,0.1155821066506457
+Non-Hispanic White Only,Did not complete high school,1730,203.6626684676952,1316,2120,0.11772408581947699
+Non-Hispanic White Only,Completed GED or high school,2734,91.4386047275851,2568,2928,0.03344499075624912
+Non-Hispanic Black Only,Did not complete high school,694,198.69872894199148,351,1141,0.28630940769739405
+Non-Hispanic Black Only,Completed GED or high school,1094,122.72451110740018,870,1354,0.11217962624076798

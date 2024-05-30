@@ -47,27 +47,9 @@ options(survey.lonely.psu='adjust')
 
 # Due to the desire to have statistically meaningful results on display in later sections of this analysis, I have decided to pull MEPS data files spanning the full years 2014 through 2019. Ideally I would have also pulled 2020, but since this project consists of an analysis of differences in healthcare spending patterns between demographic groups, and since these same spending patterns are likely to have been influenced by varying degrees regional differences in public attitudes/lockdowns/"pent-up" utilization patterns/etc. during the height of the pandemic, 2020 year data was not included.
 
-# Download the 2019 Full Year Consolidated Data File
+# Download the 2021 Full Year Consolidated Data File
 # https://meps.ahrq.gov/mepsweb/data_stats/download_data_files_detail.jsp?cboPufNumber=HC-216
 fyc21 = MEPS::read_MEPS(year = 2021, type = "FYC")
-
-cond = MEPS::read_MEPS(year = 2021, type = "COND")
-events_ip = MEPS::read_MEPS(year = 2021, type = "IP")
-library(comorbidity)
-
-cond_mod <- cond %>% 
-  select(DUPERSID, CONDN, CONDIDX, ICD10CDX, PERWT21F, IPCOND) %>% 
-  filter(ICD10CDX != -15) %>% 
-  filter(IPCOND == 1) %>% 
-  group_by(DUPERSID, ICD10CDX) %>% 
-  summarize(n = n_distinct(CONDIDX),
-            wt_sum = max(PERWT21F)) %>% 
-  ungroup() %>% 
-  group_by(DUPERSID, ICD10CDX) %>% 
-  summarize(n = sum(wt_sum)) %>% 
-  arrange(desc(n))
-
-
 
 fyc21_extended <- fyc21 %>% 
   # In some cases, respondents do not include age and it cannot be imputed using other data sources. These respondents are coded with a -1 for age. We do not wish to include these responses in our analysis.
@@ -236,35 +218,37 @@ fyc21_extended <- fyc21 %>%
 sample_size_check <-  fyc21_extended %>% 
   filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
   group_by(HIDEG_DSC, RACETHX_DSC) %>% 
-  summarize(sample_n = n())
+  summarize(sample_n = n()) %>%
+  write_csv(file="./outputs/data/sample_size_check.csv")
 
-# Not enough sample to report "Non-Hispanic Other Race or Multiple Race" breakout (n = 53, needs to be more than 60)
+# Not enough sample to report "Non-Hispanic Other Race or Multiple Race" breakout (n = 53, needs to be more than 60 per MEPS guidelines)
 
 ## High School Graduation vs. Health
 # Faceted on HS diploma or not
 # X axis is "Are you in good health?"
-# Y axis is counts based on SAQ weight, SAQWT21F
+# Y axis is estimated proportion based on SAQ weight, SAQWT21F, to provide population-representative estimates
 
 hsgrad_vs_genhealth.data <- fyc21_extended %>% 
-  filter(SAQWT21F > 0 & AGE42X >= 21) %>%
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = SAQWT21F,
     nest = T) %>% 
+  filter(SAQWT21F > 0 & AGE42X >= 21) %>%
   group_by(RACETHX_DSC, HIDEG_DSC, GENHLTH_SIMPLE) %>% 
   summarize(n = survey_prop(vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
-  filter(rse <= .3) %>% 
+  filter(rse <= .3) %>% # MEPS guidelines prefer RSE for any estimates published to fall below this threshold
   filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
   filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
-  filter(GENHLTH_SIMPLE != "N/A or Undeterminable")
+  filter(GENHLTH_SIMPLE != "N/A or Undeterminable") %>%
+  write_csv(file="./outputs/data/hsgrad_vs_genhealth.csv")
            
 hsgrad_vs_genhealth.table <- hsgrad_vs_genhealth.data %>% 
   arrange(HIDEG_DSC, RACETHX_DSC) %>% 
   flextable() %>% 
   bold(part = "header", bold = TRUE) %>% 
-  theme_box()
+  theme_box() 
 
 hsgrad_vs_genhealth.table
 
@@ -286,29 +270,28 @@ hsgrad_vs_genhealth.plot <- hsgrad_vs_genhealth.data %>%
        fill = "Highest Level of Education Attained",
        x = "Highest Level of Education Attained",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proporiton.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
-hsgrad_vs_genhealth.plot
+hsgrad_vs_genhealth.plot %>%
+  ggsave(file = "./outputs/charts/hsgrad_vs_genhealth.png", width = 10)
 
 ## High school education vs. ED / IP utils
 hsgrad_vs_ed.data <- fyc21_extended %>% 
-  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
   group_by(RACETHX_DSC, HIDEG_DSC) %>% 
   summarize(n = survey_mean(ERTOT21, vartype = c("se", "ci"), level = 0.95)) %>% 
-  mutate(rse = n_se / n,
-         n = n * 1000,
-         n_low = n_low * 1000,
-         n_upp = n_upp * 1000) %>% 
+  mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only")
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  write_csv(file="./outputs/data/hsgrad_vs_ed.csv")
 
 hsgrad_vs_ed.plot <- hsgrad_vs_ed.data %>% 
   ggplot(mapping = aes(x = HIDEG_DSC,
@@ -322,34 +305,34 @@ hsgrad_vs_ed.plot <- hsgrad_vs_ed.data %>%
   scale_y_continuous(labels = scales::comma) +
   facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
-  labs(title="Average Annual ER Visits, Per 1,000",
+  labs(title="Average Annual ER Visits",
        subtitle="By Race/Ethnicity and Highest Level of Education Attained",
-       y = "Total ER visits per 1,000",
+       y = "Average annual ER visits per person",
        x = "Highest Level of Education Attained",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proporiton.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
   theme(legend.position = "bottom") + 
   guides(fill = "none")
 
-hsgrad_vs_ed.plot
+hsgrad_vs_ed.plot %>%
+  ggsave(file = "./outputs/charts/hsgrad_vs_ed.png", width = 10)
 
-## High school education vs. IP utils
+## High school education vs. IP admits
 hsgrad_vs_ip.data <- fyc21_extended %>% 
-  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
   group_by(RACETHX_DSC, HIDEG_DSC) %>% 
   summarize(n = survey_mean(IPNGTD21, vartype = c("se", "ci"), level = 0.95)) %>% 
-  mutate(rse = n_se / n,
-         n = n * 1000,
-         n_low = n_low * 1000,
-         n_upp = n_upp * 1000) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
   filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only")
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  write_csv(file="./outputs/data/hsgrad_vs_ip.csv")
 
 hsgrad_vs_ip.plot <- hsgrad_vs_ip.data %>% 
   ggplot(mapping = aes(x = HIDEG_DSC,
@@ -363,34 +346,77 @@ hsgrad_vs_ip.plot <- hsgrad_vs_ip.data %>%
   scale_y_continuous(labels = scales::comma) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
-  labs(title="Average Number of Days Spent in an Inpatient Facility, Per 1,000",
+  labs(title="Average Number of Days Spent in an Inpatient Facility",
        subtitle="By Race/Ethnicity and Highest Level of Education Attained",
-       y = "Average inpatient days per 1,000",
+       y = "Average inpatient days per person",
        x = "Highest Level of Education Attained",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proporiton.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
-hsgrad_vs_ip.plot
+hsgrad_vs_ip.plot  %>%
+  ggsave(file = "./outputs/charts/hsgrad_vs_ip.png", width = 10)
+
+# High School Education vs. Total Cost of Care
+hsgrad_vs_totexp.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(RACETHX_DSC, HIDEG_DSC) %>% 
+  summarize(n = survey_median(TOTEXP21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>%
+  filter(rse <= .3) %>% 
+  filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  write_csv(file="./outputs/data/hsgrad_vs_totexp.csv")
+
+hsgrad_vs_totexp.plot <- hsgrad_vs_totexp.data %>% 
+  ggplot(mapping = aes(x = HIDEG_DSC,
+                       fill = RACETHX_DSC,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::dollar) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Median Annual Individual Healthcare Expenditures",
+       subtitle="By Race/Ethnicity and Highest Level of Education Attained",
+       y = "Median annual healthcare expenditures",
+       x = "Highest Level of Education Attained",
+       fill = "Race/Ethnicity",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+hsgrad_vs_totexp.plot  %>%
+  ggsave(file = "./outputs/charts/hsgrad_vs_totexp.png", width = 10)
 
 ######## Transit
 
 transit_vs_genhealth.data <- fyc21_extended %>% 
-  filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = SAQWT21F,
     nest = T) %>% 
+  filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
   group_by(RACETHX_DSC, SDNOTRANS_DSC, GENHLTH_SIMPLE) %>% 
   summarize(n = survey_prop(vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(SDNOTRANS_DSC == "Yes" | SDNOTRANS_DSC == "No") %>% 
   filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
-  filter(GENHLTH_SIMPLE != "N/A or Undeterminable")
+  filter(GENHLTH_SIMPLE != "N/A or Undeterminable") %>%
+  write_csv(file="./outputs/data/transit_vs_genhealth.csv")
 
 transit_vs_genhealth.table <- transit_vs_genhealth.data %>% 
   arrange(SDNOTRANS_DSC, RACETHX_DSC) %>% 
@@ -398,7 +424,7 @@ transit_vs_genhealth.table <- transit_vs_genhealth.data %>%
   bold(part = "header", bold = TRUE) %>% 
   theme_box()
 
-transit_vs_genhealth.table
+transit_vs_genhealth.table 
 
 # "SDNOTRANS - During last 12 months, has lack of transportation kept person from medical appointments, meetings, work, or getting things needed for daily living"
 transit_vs_genhealth.plot <- transit_vs_genhealth.data %>% 
@@ -416,30 +442,155 @@ transit_vs_genhealth.plot <- transit_vs_genhealth.data %>%
   labs(title="Self-Reported General Health Status vs. Transit Difficulties in the Last 12 Months",
        subtitle="By Race and Ethnicity",
        y = "Estimated Proportion",
-       x = str_wrap("\"During the last 12 months, has lack of transportation kept you from medical appointments, meetings, work, or getting things needed for daily living\"", 80),
+       x = str_wrap("\"During the last 12 months, has lack of transportation kept you from medical appointments, meetings, work, or getting things needed for daily living?\"", 80),
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimated proporiton.") +
   theme(legend.position = "bottom") +
+  guides(fill = "none") 
+
+transit_vs_genhealth.plot %>%
+  ggsave(file = "./outputs/charts/transit_vs_genhealth.png", width = 10)
+
+## Transit hardships vs. ED / IP utils
+transit_vs_ed.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(RACETHX_DSC, SDPUBTRANS_DSC_2) %>% 
+  summarize(n = survey_mean(ERTOT21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
+  filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
+  write_csv(file="./outputs/data/transit_vs_ed.csv")
+
+transit_vs_ed.plot <- transit_vs_ed.data %>% 
+  ggplot(mapping = aes(x = SDPUBTRANS_DSC_2,
+                       fill = RACETHX_DSC,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::comma) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  labs(title="Average Annual ER Visits",
+       subtitle="By Race/Ethnicity and Neighborhood Access to Public Transportation ",
+       y = "Average annual ER visits per person",
+       x = "Neighborhood Access to Public Transportation",
+       fill = "Race/Ethnicity",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") + 
   guides(fill = "none")
 
-transit_vs_genhealth.plot
+transit_vs_ed.plot %>%
+  ggsave(file = "./outputs/charts/transit_vs_ed.png", width = 10)
+
+## Transit vs. IP admits
+transit_vs_ip.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(RACETHX_DSC, SDPUBTRANS_DSC_2) %>% 
+  summarize(n = survey_mean(IPNGTD21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
+  filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  write_csv(file="./outputs/data/transit_vs_ip.csv")
+
+transit_vs_ip.plot <- transit_vs_ip.data %>% 
+  ggplot(mapping = aes(x = SDPUBTRANS_DSC_2,
+                       fill = RACETHX_DSC,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Average Number of Days Spent in an Inpatient Facility",
+       subtitle="By Race/Ethnicity and Neighborhood Access to Public Transportation",
+       y = "Average inpatient days per person",
+       x = "Neighborhood Access to Public Transportation",
+       fill = "Race/Ethnicity",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+transit_vs_ip.plot  %>%
+  ggsave(file = "./outputs/charts/transit_vs_ip.png", width = 10)
+
+# Transit vs. Total Cost of Care
+transit_vs_totexp.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(RACETHX_DSC, SDPUBTRANS_DSC_2) %>% 
+  summarize(n = survey_median(TOTEXP21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>%
+  filter(rse <= .3) %>% 
+  filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  write_csv(file="./outputs/data/transit_vs_totexp.csv")
+
+transit_vs_totexp.plot <- transit_vs_totexp.data %>% 
+  ggplot(mapping = aes(x = SDPUBTRANS_DSC_2,
+                       fill = RACETHX_DSC,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::dollar) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Median Annual Individual Healthcare Expenditures",
+       subtitle="By Race/Ethnicity and Neighborhood Access to Public Transportation",
+       y = "Median annual healthcare expenditures",
+       x = "Neighborhood Access to Public Transportation",
+       fill = "Race/Ethnicity",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+transit_vs_totexp.plot  %>%
+  ggsave(file = "./outputs/charts/transit_vs_totexp.png", width = 10)
 
 ### Affordable Housing
 
 housing_vs_genhealth.data <- fyc21_extended %>% 
-  filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = SAQWT21F,
     nest = T) %>% 
+  filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
   group_by(RACETHX_DSC, SDAFRDHOME_DSC_2, GENHLTH_SIMPLE) %>% 
   summarize(n = survey_prop(vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>% 
   filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
-  filter(GENHLTH_SIMPLE != "N/A or Undeterminable")
+  filter(GENHLTH_SIMPLE != "N/A or Undeterminable") %>%
+  write_csv(file="./outputs/data/housing_vs_genhealth.csv")
 
 housing_vs_genhealth.table <- housing_vs_genhealth.data %>% 
   arrange(SDAFRDHOME_DSC_2, RACETHX_DSC) %>% 
@@ -472,7 +623,129 @@ housing_vs_genhealth.plot <- housing_vs_genhealth.data %>%
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
-housing_vs_genhealth.plot
+housing_vs_genhealth.plot %>%
+  ggsave(file = "./outputs/charts/housing_vs_genhealth.png", width = 10)
+
+## Transit hardships vs. ED / IP utils
+housing_vs_ed.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(RACETHX_DSC, SDAFRDHOME_DSC_2) %>% 
+  summarize(n = survey_mean(ERTOT21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
+  filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
+  write_csv(file="./outputs/data/housing_vs_ed.csv")
+
+housing_vs_ed.plot <- housing_vs_ed.data %>% 
+  ggplot(mapping = aes(x = SDAFRDHOME_DSC_2,
+                       fill = RACETHX_DSC,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::comma) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  labs(title="Average Annual ER Visits",
+       subtitle="By Race/Ethnicity and Access to Affordable Housing",
+       y = "Average annual ER visits per person",
+       x = "Access to Affordable Housing",
+       fill = "Race/Ethnicity",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") + 
+  guides(fill = "none")
+
+housing_vs_ed.plot %>%
+  ggsave(file = "./outputs/charts/housing_vs_ed.png", width = 10)
 
 
+## Housing vs. IP admits
+housing_vs_ip.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(RACETHX_DSC, SDAFRDHOME_DSC_2) %>% 
+  summarize(n = survey_mean(IPNGTD21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
+  filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  write_csv(file="./outputs/data/housing_vs_ip.csv")
 
+housing_vs_ip.plot <- housing_vs_ip.data %>% 
+  ggplot(mapping = aes(x = SDAFRDHOME_DSC_2,
+                       fill = RACETHX_DSC,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Average Number of Days Spent in an Inpatient Facility",
+       subtitle="By Race/Ethnicity and Access to Affordable Housing",
+       y = "Average inpatient days per person",
+       x = "Access to Affordable Housing",
+       fill = "Race/Ethnicity",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+housing_vs_ip.plot  %>%
+  ggsave(file = "./outputs/charts/housing_vs_ip.png", width = 10)
+
+# Housing vs. Total Cost of Care
+housing_vs_totexp.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(RACETHX_DSC, SDAFRDHOME_DSC_2) %>% 
+  summarize(n = survey_median(TOTEXP21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>%
+  filter(rse <= .3) %>% 
+  filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
+  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  write_csv(file="./outputs/data/housing_vs_totexp.csv")
+
+housing_vs_totexp.plot <- housing_vs_totexp.data %>% 
+  ggplot(mapping = aes(x = SDAFRDHOME_DSC_2,
+                       fill = RACETHX_DSC,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::dollar) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Median Annual Individual Healthcare Expenditures",
+       subtitle="By Race/Ethnicity and Access to Affordable Housing",
+       y = "Median annual healthcare expenditures",
+       x = "Access to Affordable Housing",
+       fill = "Race/Ethnicity",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+housing_vs_totexp.plot  %>%
+  ggsave(file = "./outputs/charts/housing_vs_totexp.png", width = 10)

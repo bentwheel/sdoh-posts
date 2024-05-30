@@ -1,0 +1,7 @@
+RACETHX_DSC,SDPUBTRANS_DSC_2,n,n_se,n_low,n_upp,rse
+Hispanic,"Rated neighborhood access to public transportation as ""Excellent"", ""Very good"", or ""Good""",0.14951840746385495,0.012721730254040239,0.1244760313097043,0.1745607836180056,0.08508470943362362
+Hispanic,"Rated neighborhood access to public transportation as ""Fair"" or ""Poor""",0.10893642994231627,0.017970621726608245,0.07356175527031136,0.14431110461432117,0.16496429831713783
+Non-Hispanic White Only,"Rated neighborhood access to public transportation as ""Excellent"", ""Very good"", or ""Good""",0.1886302729930402,0.010232130567410297,0.16848860535737448,0.2087719406287059,0.05424437130400499
+Non-Hispanic White Only,"Rated neighborhood access to public transportation as ""Fair"" or ""Poor""",0.19259887547533525,0.01265351304036486,0.16769078303031326,0.21750696792035723,0.06569878982489337
+Non-Hispanic Black Only,"Rated neighborhood access to public transportation as ""Excellent"", ""Very good"", or ""Good""",0.25291258166640207,0.020750854005185237,0.21206509621113717,0.29376006712166697,0.08204753543086332
+Non-Hispanic Black Only,"Rated neighborhood access to public transportation as ""Fair"" or ""Poor""",0.2571955482598864,0.033859441385483025,0.19054416903610555,0.3238469274836672,0.13164862928058668

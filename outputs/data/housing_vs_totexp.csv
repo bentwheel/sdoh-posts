@@ -1,0 +1,7 @@
+RACETHX_DSC,SDAFRDHOME_DSC_2,n,n_se,n_low,n_upp,rse
+Hispanic,"""Excellent"", ""Very good"", or ""Good""",492,68.08791951993719,378,647,0.13839008032507558
+Hispanic,"""Fair"" or ""Poor""",748,90.24443664982947,604,961,0.12064764257998592
+Non-Hispanic White Only,"""Excellent"", ""Very good"", or ""Good""",3011,108.69625827180933,2774,3202,0.036099720448956936
+Non-Hispanic White Only,"""Fair"" or ""Poor""",2961,158.1830533878054,2679,3302,0.05342217270780324
+Non-Hispanic Black Only,"""Excellent"", ""Very good"", or ""Good""",1531,193.72526352224943,1156,1921,0.12653511660499636
+Non-Hispanic Black Only,"""Fair"" or ""Poor""",1295,195.3618216880142,928,1701,0.15085854956603414
