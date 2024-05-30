@@ -5,3 +5,7 @@ Non-Hispanic White Only,"""Excellent"", ""Very good"", or ""Good""",3011,108.696
 Non-Hispanic White Only,"""Fair"" or ""Poor""",2961,158.1830533878054,2679,3302,0.05342217270780324
 Non-Hispanic Black Only,"""Excellent"", ""Very good"", or ""Good""",1531,193.72526352224943,1156,1921,0.12653511660499636
 Non-Hispanic Black Only,"""Fair"" or ""Poor""",1295,195.3618216880142,928,1701,0.15085854956603414
+Non-Hispanic Asian Only,"""Excellent"", ""Very good"", or ""Good""",928,165.82386092599145,621,1281,0.17868950530818045
+Non-Hispanic Asian Only,"""Fair"" or ""Poor""",1263,174.99723335824177,964,1666,0.13855679600810908
+Non-Hispanic Other Race or Multiple Race,"""Excellent"", ""Very good"", or ""Good""",2653,434.34772372126355,1518,3251,0.16371945862090598
+Non-Hispanic Other Race or Multiple Race,"""Fair"" or ""Poor""",2962,504.8330519086485,2101,4130,0.17043654689691035

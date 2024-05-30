@@ -2,7 +2,7 @@
 
 This repository contains example code demonstrating how to use the [Medical Expenditure Panel Survey](https://meps.ahrq.gov/mepsweb/) PUF (Public Use Files) for the 2021 survey year to construct estimates (with confidence intervals!) around key health outcomes measures for the US population and the relationship between these outcomes measures and key Social Determinants of Health (SDoH) factors which have been shown in the literature to be most strongly associated with healthcare outcomes and costs.
 
-Due to sample sizes which are insufficient (per [MEPS guidelines](https://meps.ahrq.gov/survey_comp/precision_guidelines.shtml)) for producing estimates, demographic breakouts for populations designated `Non-Hispanic Asian` and `Non-Hispanic Other Race or Multiple Race` are not included in these visuals. Sample size totals for these exhibits are available in the following tables:
+Due to sample sizes which are insufficient (n < 60, per [MEPS precision standards guidelines](https://meps.ahrq.gov/survey_comp/precision_guidelines.shtml)) for producing estimates, demographic breakouts for populations designated `Non-Hispanic Asian` and `Non-Hispanic Other Race or Multiple Race` are not included in all visuals. Sample size totals for these exhibits are available in the following tables:
 
 * [HS Graduation](outputs/data/sample_size_check_hsgrad.csv)
 * [Transit Availability](outputs/data/sample_size_check_transit.csv)

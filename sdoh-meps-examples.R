@@ -426,7 +426,7 @@ transit_vs_genhealth.data <- fyc21_extended %>%
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(SDNOTRANS_DSC == "Yes" | SDNOTRANS_DSC == "No") %>% 
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
+  filter(RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
   filter(GENHLTH_SIMPLE != "N/A or Undeterminable") %>%
   write_csv(file="./outputs/data/transit_vs_genhealth.csv")
 
@@ -476,7 +476,7 @@ transit_vs_ed.data <- fyc21_extended %>%
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
+  filter(RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
   write_csv(file="./outputs/data/transit_vs_ed.csv")
 
 transit_vs_ed.plot <- transit_vs_ed.data %>% 
@@ -517,7 +517,7 @@ transit_vs_ip.data <- fyc21_extended %>%
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  filter(RACETHX_DSC != "Non-Hispanic Asian Only") %>%
   write_csv(file="./outputs/data/transit_vs_ip.csv")
 
 transit_vs_ip.plot <- transit_vs_ip.data %>% 
@@ -558,7 +558,7 @@ transit_vs_totexp.data <- fyc21_extended %>%
   mutate(rse = n_se / n) %>%
   filter(rse <= .3) %>% 
   filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
+  filter(RACETHX_DSC != "Non-Hispanic Asian Only") %>%
   write_csv(file="./outputs/data/transit_vs_totexp.csv")
 
 transit_vs_totexp.plot <- transit_vs_totexp.data %>% 
@@ -600,7 +600,6 @@ housing_vs_genhealth.data <- fyc21_extended %>%
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>% 
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
   filter(GENHLTH_SIMPLE != "N/A or Undeterminable") %>%
   write_csv(file="./outputs/data/housing_vs_genhealth.csv")
 
@@ -651,7 +650,6 @@ housing_vs_ed.data <- fyc21_extended %>%
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
   write_csv(file="./outputs/data/housing_vs_ed.csv")
 
 housing_vs_ed.plot <- housing_vs_ed.data %>% 
@@ -693,7 +691,6 @@ housing_vs_ip.data <- fyc21_extended %>%
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
   write_csv(file="./outputs/data/housing_vs_ip.csv")
 
 housing_vs_ip.plot <- housing_vs_ip.data %>% 
@@ -734,7 +731,6 @@ housing_vs_totexp.data <- fyc21_extended %>%
   mutate(rse = n_se / n) %>%
   filter(rse <= .3) %>% 
   filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
-  filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
   write_csv(file="./outputs/data/housing_vs_totexp.csv")
 
 housing_vs_totexp.plot <- housing_vs_totexp.data %>% 
