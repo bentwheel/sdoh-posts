@@ -1,0 +1,9 @@
+HDDX_DSC,DIABDX_DSC,SDPUBTRANS_DSC_2,n,n_se,n_low,n_upp,rse
+Not Diagnosed with Heart Disease,Not Diagnosed with Diabetes,"""Excellent"", ""Very good"", or ""Good""",1294,62.22202267486825,1187,1432,0.04808502525105738
+Not Diagnosed with Heart Disease,Not Diagnosed with Diabetes,"""Fair"" or ""Poor""",1781,78.97309686821606,1660,1971,0.04434199711859408
+Not Diagnosed with Heart Disease,Diagnosed with Diabetes,"""Excellent"", ""Very good"", or ""Good""",6972,505.0348266442155,5954,7946,0.07243758270857939
+Not Diagnosed with Heart Disease,Diagnosed with Diabetes,"""Fair"" or ""Poor""",7481,571.485346575181,6475,8735,0.076391571524553
+Diagnosed with Heart Disease,Not Diagnosed with Diabetes,"""Excellent"", ""Very good"", or ""Good""",5869,496.12669978138126,4982,6938,0.08453342984859112
+Diagnosed with Heart Disease,Not Diagnosed with Diabetes,"""Fair"" or ""Poor""",5900,386.9433520428402,5097,6624,0.0655836189903119
+Diagnosed with Heart Disease,Diagnosed with Diabetes,"""Excellent"", ""Very good"", or ""Good""",11797,1120.2450580899897,9694,14125,0.09496016428668218
+Diagnosed with Heart Disease,Diagnosed with Diabetes,"""Fair"" or ""Poor""",14193,1485.2101194967843,11055,16960,0.10464384693135942

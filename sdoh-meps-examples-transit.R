@@ -177,8 +177,8 @@ fyc21_extended <- fyc21 %>%
                                     .default = "N/A or Undeterminable")) %>% 
   arrange(SDPUBTRANS) %>% 
   mutate(SDPUBTRANS_DSC = forcats::fct_inorder(SDPUBTRANS_DSC)) %>% 
-  mutate(SDPUBTRANS_DSC_2 = case_when(SDPUBTRANS == 1 | SDPUBTRANS == 2 | SDPUBTRANS == 3 ~ "Rated neighborhood access to public transportation as \"Excellent\", \"Very good\", or \"Good\"",
-                                      SDPUBTRANS == 4 | SDPUBTRANS == 5 ~ "Rated neighborhood access to public transportation as \"Fair\" or \"Poor\"",
+  mutate(SDPUBTRANS_DSC_2 = case_when(SDPUBTRANS == 1 | SDPUBTRANS == 2 | SDPUBTRANS == 3 ~ "\"Excellent\", \"Very good\", or \"Good\"",
+                                      SDPUBTRANS == 4 | SDPUBTRANS == 5 ~ "\"Fair\" or \"Poor\"",
                                       .default = "N/A or Undeterminable")) %>% 
   arrange(SDPUBTRANS) %>% 
   mutate(SDPUBTRANS_DSC_2 = forcats::fct_inorder(SDPUBTRANS_DSC_2)) %>% 
@@ -272,8 +272,7 @@ transit_vs_genhealth.plot <- transit_vs_genhealth.data %>%
                        y = n)) +
   scale_fill_viridis_d(begin = 0.75, end = 0) +
   geom_bar(stat="identity", position="dodge", alpha = .75) +
-  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
-                position=position_dodge(.9)) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2) + 
   theme_bw() +
   scale_y_continuous(labels = scales::percent) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
@@ -288,7 +287,7 @@ transit_vs_genhealth.plot <- transit_vs_genhealth.data %>%
   guides(fill = "none") 
 
 transit_vs_genhealth.plot %>%
-  ggsave(file = "./outputs/charts/transit_vs_genhealth.png", width = 10)
+  ggsave(file = "./outputs/charts/transit_vs_genhealth.png", width = 11, height = 8.5)
 
 ## Transit hardships vs. ED / IP utils
 transit_vs_ed_all <- fyc21_extended %>% 
@@ -336,7 +335,7 @@ transit_vs_ed.plot <- transit_vs_ed.data %>%
   labs(title="Average Annual ER Visits",
        subtitle="By Race/Ethnicity and Neighborhood Access to Public Transportation ",
        y = "Average annual ER visits per person",
-       x = "Neighborhood Access to Public Transportation",
+       x = "Self-rated Level of Neighborhood Access to Public Transportation",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
@@ -344,7 +343,47 @@ transit_vs_ed.plot <- transit_vs_ed.data %>%
   guides(fill = "none")
 
 transit_vs_ed.plot %>%
-  ggsave(file = "./outputs/charts/transit_vs_ed.png", width = 10)
+  ggsave(file = "./outputs/charts/transit_vs_ed.png", width = 11, height = 8.5)
+
+## Transit hardships vs. ED / IP utils by Select Chronic Cond. DX
+transit_vs_ed_CC.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDPUBTRANS_DSC_2) %>% 
+  summarize(n = survey_mean(ERTOT21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
+  filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
+  filter(HDDX_DSC != "Unknown or Inapplicable" & DIABDX_DSC != "Unknown or Inapplicable") %>%
+  write_csv(file="./outputs/data/transit_vs_ed_CC.csv")
+
+transit_vs_ed_CC.plot <- transit_vs_ed_CC.data %>% 
+  ggplot(mapping = aes(x = SDPUBTRANS_DSC_2,
+                       fill = SDPUBTRANS_DSC_2,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::comma) +
+  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="free", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  labs(title="Average Annual ER Visits",
+       subtitle="By Select Chronic Condition Diagnosis and Neighborhood Access to Public Transportation",
+       y = "Average annual ER visits per person",
+       x = "Self-rated Level of Neighborhood Access to Public Transportation",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") + 
+  guides(fill = "none")
+
+transit_vs_ed_CC.plot %>%
+  ggsave(file = "./outputs/charts/transit_vs_ed_CC.png", width = 11, height = 8.5)
 
 ## Transit vs. IP admits
 transit_vs_ip_all <- fyc21_extended %>% 
@@ -400,7 +439,47 @@ transit_vs_ip.plot <- transit_vs_ip.data %>%
   guides(fill = "none")
 
 transit_vs_ip.plot  %>%
-  ggsave(file = "./outputs/charts/transit_vs_ip.png", width = 10)
+  ggsave(file = "./outputs/charts/transit_vs_ip.png", width = 11, height = 8.5)
+
+## Transit vs. IP admits by select Chronic Cond. DX
+transit_vs_ip_CC.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDPUBTRANS_DSC_2) %>% 
+  summarize(n = survey_mean(IPNGTD21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
+  filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
+  filter(HDDX_DSC != "Unknown or Inapplicable" & DIABDX_DSC != "Unknown or Inapplicable") %>%
+  write_csv(file="./outputs/data/transit_vs_ip_CC.csv")
+
+transit_vs_ip_CC.plot <- transit_vs_ip_CC.data %>% 
+  ggplot(mapping = aes(x = SDPUBTRANS_DSC_2,
+                       fill = SDPUBTRANS_DSC_2,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="free", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Average Number of Days Spent in an Inpatient Facility",
+       subtitle="By Select Chronic Condition Diagnosis and Neighborhood Access to Public Transportation",
+       y = "Average inpatient days per person",
+       x = "Self-rated Level of Neighborhood Access to Public Transportation",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+transit_vs_ip_CC.plot  %>%
+  ggsave(file = "./outputs/charts/transit_vs_ip_CC.png", width = 11, height = 8.5)
 
 # Transit vs. Total Cost of Care
 transit_vs_totexp_all <- fyc21_extended %>% 
@@ -456,4 +535,44 @@ transit_vs_totexp.plot <- transit_vs_totexp.data %>%
   guides(fill = "none")
 
 transit_vs_totexp.plot  %>%
-  ggsave(file = "./outputs/charts/transit_vs_totexp.png", width = 10)
+  ggsave(file = "./outputs/charts/transit_vs_totexp.png", width = 11, height = 8.5)
+
+# Transit vs. Total Cost of Care, by select Chronic Cond. DX
+transit_vs_totexp_CC.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDPUBTRANS_DSC_2) %>% 
+  summarize(n = survey_median(TOTEXP21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>%
+  filter(rse <= .3) %>% 
+  filter(SDPUBTRANS_DSC_2 != "N/A or Undeterminable") %>%
+  filter(HDDX_DSC != "Unknown or Inapplicable" & DIABDX_DSC != "Unknown or Inapplicable") %>%
+  write_csv(file="./outputs/data/transit_vs_totexp_CC.csv")
+
+transit_vs_totexp_CC.plot <- transit_vs_totexp_CC.data %>% 
+  ggplot(mapping = aes(x = SDPUBTRANS_DSC_2,
+                       fill = SDPUBTRANS_DSC_2,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::dollar) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="free", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Median Annual Individual Healthcare Expenditures",
+       subtitle="By Select Chronic Condition Diagnosis and Neighborhood Access to Public Transportation",
+       y = "Median annual healthcare expenditures",
+       x = "Self-rated Level of Neighborhood Access to Public Transportation",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+transit_vs_totexp_CC.plot  %>%
+  ggsave(file = "./outputs/charts/transit_vs_totexp_CC.png", width = 11, height = 8.5)

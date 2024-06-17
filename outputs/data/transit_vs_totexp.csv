@@ -1,11 +1,11 @@
 RACETHX_DSC,SDPUBTRANS_DSC_2,n,n_se,n_low,n_upp,rse
-Hispanic,"Rated neighborhood access to public transportation as ""Excellent"", ""Very good"", or ""Good""",584,58.97578159161846,492,725,0.10098592738290832
-Hispanic,"Rated neighborhood access to public transportation as ""Fair"" or ""Poor""",724,139.63942086333222,467,1020,0.19287212826427103
-Non-Hispanic White Only,"Rated neighborhood access to public transportation as ""Excellent"", ""Very good"", or ""Good""",2833,125.19753387236017,2646,3139,0.04419256402130609
-Non-Hispanic White Only,"Rated neighborhood access to public transportation as ""Fair"" or ""Poor""",3142,123.40252408709729,2912,3398,0.039275150887045605
-Non-Hispanic Black Only,"Rated neighborhood access to public transportation as ""Excellent"", ""Very good"", or ""Good""",1175,170.01279476600124,891,1562,0.14469174022638404
-Non-Hispanic Black Only,"Rated neighborhood access to public transportation as ""Fair"" or ""Poor""",1832,265.3839855482296,1411,2465,0.14486025412021267
-Non-Hispanic Other Race or Multiple Race,"Rated neighborhood access to public transportation as ""Excellent"", ""Very good"", or ""Good""",2112,450.0596826529775,1307,3099,0.21309644065008404
-Non-Hispanic Other Race or Multiple Race,"Rated neighborhood access to public transportation as ""Fair"" or ""Poor""",3251,766.1060029842773,2101,5191,0.23565241555960545
-All Race/Ethnicity Groups,"Rated neighborhood access to public transportation as ""Excellent"", ""Very good"", or ""Good""",1896,77.72281401844734,1733,2039,0.040993045368379395
-All Race/Ethnicity Groups,"Rated neighborhood access to public transportation as ""Fair"" or ""Poor""",2544,103.87268275110658,2362,2771,0.040830457056252586
+Hispanic,"""Excellent"", ""Very good"", or ""Good""",584,58.97578159161846,492,725,0.10098592738290832
+Hispanic,"""Fair"" or ""Poor""",724,139.63942086333222,467,1020,0.19287212826427103
+Non-Hispanic White Only,"""Excellent"", ""Very good"", or ""Good""",2833,125.19753387236017,2646,3139,0.04419256402130609
+Non-Hispanic White Only,"""Fair"" or ""Poor""",3142,123.40252408709729,2912,3398,0.039275150887045605
+Non-Hispanic Black Only,"""Excellent"", ""Very good"", or ""Good""",1175,170.01279476600124,891,1562,0.14469174022638404
+Non-Hispanic Black Only,"""Fair"" or ""Poor""",1832,265.3839855482296,1411,2465,0.14486025412021267
+Non-Hispanic Other Race or Multiple Race,"""Excellent"", ""Very good"", or ""Good""",2112,450.0596826529775,1307,3099,0.21309644065008404
+Non-Hispanic Other Race or Multiple Race,"""Fair"" or ""Poor""",3251,766.1060029842773,2101,5191,0.23565241555960545
+All Race/Ethnicity Groups,"""Excellent"", ""Very good"", or ""Good""",1896,77.72281401844734,1733,2039,0.040993045368379395
+All Race/Ethnicity Groups,"""Fair"" or ""Poor""",2544,103.87268275110658,2362,2771,0.040830457056252586
