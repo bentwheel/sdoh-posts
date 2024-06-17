@@ -291,7 +291,7 @@ hsgrad_vs_genhealth.plot <- hsgrad_vs_genhealth.data %>%
   guides(fill = "none")
 
 hsgrad_vs_genhealth.plot %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_genhealth.png", width = 10)
+  ggsave(file = "./outputs/charts/hsgrad_vs_genhealth.png", width = 11, height = 8.5)
 
 ## High school education vs. ED / IP utils
 
@@ -348,7 +348,7 @@ hsgrad_vs_ed.plot <- hsgrad_vs_ed.data %>%
   guides(fill = "none")
 
 hsgrad_vs_ed.plot %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_ed.png", width = 10)
+  ggsave(file = "./outputs/charts/hsgrad_vs_ed.png", width = 11, height = 8.5)
 
 ## High school education and ED util broken out by Chronic Cond. Status
 
@@ -389,7 +389,7 @@ hsgrad_vs_ed_CC.plot <- hsgrad_vs_ed_CC.data %>%
   guides(fill = "none")
 
 hsgrad_vs_ed_CC.plot %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_ed_CC.png", width = 10)
+  ggsave(file = "./outputs/charts/hsgrad_vs_ed_CC.png", width = 11, height = 8.5)
 
 ## High school education vs. IP admits
 hsgrad_vs_ip_all <- fyc21_extended %>% 
@@ -445,7 +445,7 @@ hsgrad_vs_ip.plot <- hsgrad_vs_ip.data %>%
   guides(fill = "none")
 
 hsgrad_vs_ip.plot  %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_ip.png", width = 10)
+  ggsave(file = "./outputs/charts/hsgrad_vs_ip.png", width = 11, height = 8.5)
 
 ## High school education vs. IP admits by Chronic Cond.
 hsgrad_vs_ip_CC.data <- fyc21_extended %>% 
@@ -485,7 +485,7 @@ hsgrad_vs_ip_CC.plot <- hsgrad_vs_ip_CC.data %>%
   guides(fill = "none")
 
 hsgrad_vs_ip_CC.plot  %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_ip_CC.png", width = 10)
+  ggsave(file = "./outputs/charts/hsgrad_vs_ip_CC.png", width = 11, height = 8.5)
 
 # High School Education vs. Total Cost of Care
 hsgrad_vs_totexp_all <- fyc21_extended %>% 
@@ -541,7 +541,7 @@ hsgrad_vs_totexp.plot <- hsgrad_vs_totexp.data %>%
   guides(fill = "none")
 
 hsgrad_vs_totexp.plot  %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_totexp.png", width = 10)
+  ggsave(file = "./outputs/charts/hsgrad_vs_totexp.png", width = 11, height = 8.5)
 
 # High School Education vs. Total Cost of Care by select Chronic Cond. Dx
 
@@ -582,6 +582,6 @@ hsgrad_vs_totexp_CC.plot <- hsgrad_vs_totexp_CC.data %>%
   guides(fill = "none")
 
 hsgrad_vs_totexp_CC.plot  %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_totexp_CC.png", width = 10)
+  ggsave(file = "./outputs/charts/hsgrad_vs_totexp_CC.png", width = 11, height = 8.5)
 
  
