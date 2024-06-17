@@ -1,0 +1,9 @@
+HDDX_DSC,DIABDX_DSC,HIDEG_DSC,n,n_se,n_low,n_upp,rse
+Not Diagnosed with Heart Disease,Not Diagnosed with Diabetes,Did not complete high school,404,59.36954429552872,314,548,0.1469543175631899
+Not Diagnosed with Heart Disease,Not Diagnosed with Diabetes,Completed GED or high school,1400,49.52924422744193,1304,1499,0.03537803159102995
+Not Diagnosed with Heart Disease,Diagnosed with Diabetes,Did not complete high school,3894,543.035514305265,2962,5120,0.13945442072554315
+Not Diagnosed with Heart Disease,Diagnosed with Diabetes,Completed GED or high school,6950,371.9476578514748,6178,7644,0.05351764861172299
+Diagnosed with Heart Disease,Not Diagnosed with Diabetes,Did not complete high school,6601,1026.0124745060523,4013,8110,0.15543288509408457
+Diagnosed with Heart Disease,Not Diagnosed with Diabetes,Completed GED or high school,5391,295.73122703209475,4941,6106,0.05485646949213407
+Diagnosed with Heart Disease,Diagnosed with Diabetes,Did not complete high school,10371,1841.5386027373036,8193,15649,0.1775661558902038
+Diagnosed with Heart Disease,Diagnosed with Diabetes,Completed GED or high school,12551,978.1279233041016,11055,14915,0.07793227020190437

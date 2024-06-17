@@ -19,12 +19,20 @@ The work in this repository constitutes my own work and assertions and should no
 ![image](outputs/charts/hsgrad_vs_ip.png)
 [Supporting data](outputs/data/hsgrad_vs_ip.csv)
 
+![image](outputs/charts/hsgrad_vs_ip_CC.png)
+[Supporting data](outputs/data/hsgrad_vs_ip_CC.csv)
+
 ![image](outputs/charts/hsgrad_vs_ed.png)
 [Supporting data](outputs/data/hsgrad_vs_ed.csv)
+
+![image](outputs/charts/hsgrad_vs_ed_CC.png)
+[Supporting data](outputs/data/hsgrad_vs_ed_CC.csv)
 
 ![image](outputs/charts/hsgrad_vs_totexp.png)
 [Supporting data](outputs/data/hsgrad_vs_totexp.csv)
 
+![image](outputs/charts/hsgrad_vs_totexp_CC.png)
+[Supporting data](outputs/data/hsgrad_vs_totexp_CC.csv)
 
 ## Neighborhood Availability of Public Transit
 
