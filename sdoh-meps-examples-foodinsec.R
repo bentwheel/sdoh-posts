@@ -585,6 +585,6 @@ foodinsec_vs_totexp_CC.plot <- foodinsec_vs_totexp_CC.data %>%
   guides(fill = "none")
 
 foodinsec_vs_totexp_CC.plot  %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_totexp_CC.png", width = 11, height = 8.5)
+  ggsave(file = "./outputs/charts/foodinsec_vs_totexp_CC.png", width = 11, height = 8.5)
 
  
