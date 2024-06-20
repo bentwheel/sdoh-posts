@@ -277,10 +277,10 @@ housing_vs_genhealth.plot <- housing_vs_genhealth.data %>%
   theme_bw() +
   scale_y_continuous(labels = scales::percent) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
-  facet_grid(GENHLTH_SIMPLE ~ RACETHX_DSC, scales="free_y", labeller = label_wrap_gen(width = 20, multi_line = TRUE)) +
+  facet_grid(GENHLTH_SIMPLE ~ RACETHX_DSC, scales="fixed", labeller = label_wrap_gen(width = 20, multi_line = TRUE)) +
   labs(title="Self-Reported General Health Status vs. Rated Access to Affordable Housing",
        subtitle="By Race and Ethnicity",
-       y = "estimate",
+       y = "Percent of US Population Ages 16+",
        x = "Rated neighborhood access to affordable housing",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimate.") +
@@ -331,7 +331,7 @@ housing_vs_ed.plot <- housing_vs_ed.data %>%
                 position=position_dodge(.9)) +
   theme_bw() +
   scale_y_continuous(labels = scales::comma) +
-  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   labs(title="Average Annual ER Visits",
        subtitle="By Race/Ethnicity and Access to Affordable Housing",
@@ -429,7 +429,7 @@ housing_vs_ip.plot <- housing_vs_ip.data %>%
   theme_bw() +
   scale_y_continuous(labels = scales::comma) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
-  facet_wrap(~ RACETHX_DSC, ncol = 4, scales="free", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  facet_wrap(~ RACETHX_DSC, ncol = 4, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   labs(title="Average Number of Days Spent in an Inpatient Facility",
        subtitle="By Race/Ethnicity and Access to Affordable Housing",
        y = "Average inpatient days per person",
@@ -524,7 +524,7 @@ housing_vs_totexp.plot <- housing_vs_totexp.data %>%
   theme_bw() +
   scale_y_continuous(labels = scales::dollar) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
-  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="free", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  facet_wrap(~ RACETHX_DSC, ncol = 3, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   labs(title="Median Annual Individual Healthcare Expenditures",
        subtitle="By Race/Ethnicity and Access to Affordable Housing",
        y = "Median annual healthcare expenditures",

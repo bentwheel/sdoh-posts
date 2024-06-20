@@ -1,0 +1,9 @@
+RACETHX_DSC,SDHLTHFOOD_DSC_2,n,n_se,n_low,n_upp,rse
+Hispanic,"""Excellent"", ""Very good"", or ""Good""",607,73.69485038538421,492,783,0.12140832023951272
+Hispanic,"""Fair"" or ""Poor""",608,143.4899544888911,349,920,0.2360032146198867
+Non-Hispanic White Only,"""Excellent"", ""Very good"", or ""Good""",3060,104.89539595469667,2825,3238,0.03427954116166558
+Non-Hispanic White Only,"""Fair"" or ""Poor""",2631,272.7555728784893,2119,3195,0.10366992507734296
+Non-Hispanic Black Only,"""Excellent"", ""Very good"", or ""Good""",1432,138.8937444384012,1161,1709,0.0969928382949729
+Non-Hispanic Black Only,"""Fair"" or ""Poor""",1123,290.43509048824933,656,1810,0.2586243014142915
+All Race/Ethnicity Groups,"""Excellent"", ""Very good"", or ""Good""",2173,71.37513987051906,2048,2329,0.032846359811559624
+All Race/Ethnicity Groups,"""Fair"" or ""Poor""",1837,127.41778838179488,1615,2117,0.06936188806847843

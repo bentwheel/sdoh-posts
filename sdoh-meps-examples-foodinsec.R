@@ -195,6 +195,11 @@ fyc21_extended <- fyc21 %>%
                                       .default = "N/A or Undeterminable")) %>% 
   arrange(SDAFRDHOME) %>% 
   mutate(SDAFRDHOME_DSC_2 = forcats::fct_inorder(SDAFRDHOME_DSC_2)) %>% 
+  mutate(SDHLTHFOOD_DSC_2 = case_when(SDHLTHFOOD == 1 | SDHLTHFOOD == 2 | SDHLTHFOOD == 3 ~ "\"Excellent\", \"Very good\", or \"Good\"",
+                                      SDHLTHFOOD == 4 | SDHLTHFOOD == 5 ~ "\"Fair\" or \"Poor\"",
+                                      .default = "N/A or Undeterminable")) %>% 
+  arrange(SDHLTHFOOD) %>% 
+  mutate(SDHLTHFOOD_DSC_2 = forcats::fct_inorder(SDHLTHFOOD_DSC_2)) %>% 
   mutate(SDNOTRANS_DSC = case_when(SDNOTRANS == 1 ~ "Yes",
                                    SDNOTRANS == 2 ~ "No",
                                    .default = "N/A or Undeterminable")) %>% 
@@ -216,61 +221,59 @@ fyc21_extended <- fyc21 %>%
   mutate(GENHLTH_SIMPLE = forcats::fct_inorder(GENHLTH_SIMPLE))
 
 # Sample size check
-sample_size_check_hsgrad <-  fyc21_extended %>% 
+sample_size_check_foodinsecnsec <-  fyc21_extended %>% 
   filter(SAQWT21F > 0 & AGE42X >= 16) %>% 
-  group_by(HIDEG_DSC, RACETHX_DSC) %>% 
+  group_by(SDHLTHFOOD_DSC_2, RACETHX_DSC) %>% 
   summarize(sample_n = n()) %>%
-  write_csv(file="./outputs/data/sample_size_check_hsgrad.csv")
+  write_csv(file="./outputs/data/sample_size_check_foodinsec.csv")
 
 # Not enough sample to report "Non-Hispanic Other Race or Multiple Race" breakout (n = 53, needs to be more than 60 per MEPS guidelines)
 
-## High School Graduation vs. Health
-# Faceted on HS diploma or not
-# X axis is "Are you in good health?"
+## Food Insecurity vs. Health
 # Y axis is estimate based on SAQ weight, SAQWT21F, to provide population-representative estimates
 
-hsgrad_vs_genhealth_all <- fyc21_extended %>% 
+foodinsec_vs_genhealth_all <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = SAQWT21F,
     nest = T) %>% 
   filter(SAQWT21F > 0 & AGE42X >= 21) %>%
-  group_by(HIDEG_DSC, GENHLTH_SIMPLE) %>% 
+  group_by(SDHLTHFOOD_DSC_2, GENHLTH_SIMPLE) %>% 
   summarize(n = survey_prop(vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>%  # MEPS guidelines prefer RSE for any estimates published to fall below this threshold
   mutate(RACETHX_DSC = "All Race/Ethnicity Groups") %>%
-  relocate(RACETHX_DSC, .before=HIDEG_DSC)
+  relocate(RACETHX_DSC, .before=SDHLTHFOOD_DSC_2)
 
-hsgrad_vs_genhealth.data <- fyc21_extended %>% 
+foodinsec_vs_genhealth.data <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = SAQWT21F,
     nest = T) %>% 
   filter(SAQWT21F > 0 & AGE42X >= 21) %>%
-  group_by(RACETHX_DSC, HIDEG_DSC, GENHLTH_SIMPLE) %>% 
+  group_by(RACETHX_DSC, SDHLTHFOOD_DSC_2, GENHLTH_SIMPLE) %>% 
   summarize(n = survey_prop(vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% # MEPS guidelines prefer RSE for any estimates published to fall below this threshold
-  union_all(hsgrad_vs_genhealth_all) %>%
-  filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
+  union_all(foodinsec_vs_genhealth_all) %>%
+  filter(SDHLTHFOOD_DSC_2 != "N/A or Undeterminable") %>% 
   filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>% 
   filter(GENHLTH_SIMPLE != "N/A or Undeterminable") %>%
-  write_csv(file="./outputs/data/hsgrad_vs_genhealth.csv")
+  write_csv(file="./outputs/data/foodinsec_vs_genhealth.csv")
 
-hsgrad_vs_genhealth.table <- hsgrad_vs_genhealth.data %>% 
-  arrange(HIDEG_DSC, RACETHX_DSC) %>% 
+foodinsec_vs_genhealth.table <- foodinsec_vs_genhealth.data %>% 
+  arrange(SDHLTHFOOD_DSC_2, RACETHX_DSC) %>% 
   flextable() %>% 
   bold(part = "header", bold = TRUE) %>% 
   theme_box() 
 
-hsgrad_vs_genhealth.table
+foodinsec_vs_genhealth.table
 
-hsgrad_vs_genhealth.plot <- hsgrad_vs_genhealth.data %>% 
-  ggplot(mapping = aes(x = HIDEG_DSC,
-                       fill = HIDEG_DSC,
+foodinsec_vs_genhealth.plot <- foodinsec_vs_genhealth.data %>% 
+  ggplot(mapping = aes(x = SDHLTHFOOD_DSC_2,
+                       fill = SDHLTHFOOD_DSC_2,
                        y = n)) +
   scale_fill_viridis_d(begin = 0.75, end = 0) +
   geom_bar(stat="identity", position="dodge", alpha = .75) +
@@ -280,53 +283,53 @@ hsgrad_vs_genhealth.plot <- hsgrad_vs_genhealth.data %>%
   scale_y_continuous(labels = scales::percent) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   facet_grid(GENHLTH_SIMPLE ~ RACETHX_DSC, scales="fixed", labeller = label_wrap_gen(width = 20, multi_line = TRUE)) +
-  labs(title="Self-Reported General Health Status vs. Highest Level of Education Attained",
+  labs(title="Self-Reported General Health Status vs. Neighborhood Availability of Places to Buy Healthy Food",
        subtitle="By Race and Ethnicity",
        y = "Percent of US Population Ages 16+",
-       fill = "Highest Level of Education Attained",
-       x = "Highest Level of Education Attained",
+       fill = "Self-rated Level of Neighborhood Availability of Places to Buy Healthy Food",
+       x = "Self-rated Level of Neighborhood Availability of Places to Buy Healthy Food",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
-hsgrad_vs_genhealth.plot %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_genhealth.png", width = 11, height = 8.5)
+foodinsec_vs_genhealth.plot %>%
+  ggsave(file = "./outputs/charts/foodinsec_vs_genhealth.png", width = 11, height = 8.5)
 
-## High school education vs. ED / IP utils
+## Food Insecurity vs. ED / IP utils
 
-hsgrad_vs_ed_all <- fyc21_extended %>% 
+foodinsec_vs_ed_all <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(HIDEG_DSC) %>% 
+  group_by(SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_mean(ERTOT21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   mutate(RACETHX_DSC = "All Race/Ethnicity Groups") %>%
-  relocate(RACETHX_DSC, .before=HIDEG_DSC) 
+  relocate(RACETHX_DSC, .before=SDHLTHFOOD_DSC_2) 
 
-hsgrad_vs_ed.data <- fyc21_extended %>% 
+foodinsec_vs_ed.data <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(RACETHX_DSC, HIDEG_DSC) %>% 
+  group_by(RACETHX_DSC, SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_mean(ERTOT21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
-  union_all(hsgrad_vs_ed_all) %>%
-  filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
+  union_all(foodinsec_vs_ed_all) %>%
+  filter(SDHLTHFOOD_DSC_2 != "N/A or Undeterminable") %>% 
   filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
-  write_csv(file="./outputs/data/hsgrad_vs_ed.csv")
+  write_csv(file="./outputs/data/foodinsec_vs_ed.csv")
 
-hsgrad_vs_ed.plot <- hsgrad_vs_ed.data %>% 
-  ggplot(mapping = aes(x = HIDEG_DSC,
+foodinsec_vs_ed.plot <- foodinsec_vs_ed.data %>% 
+  ggplot(mapping = aes(x = SDHLTHFOOD_DSC_2,
                        fill = RACETHX_DSC,
                        y = n)) +
   scale_fill_viridis_d(begin = 0.75, end = 0) +
@@ -338,38 +341,38 @@ hsgrad_vs_ed.plot <- hsgrad_vs_ed.data %>%
   facet_wrap(~ RACETHX_DSC, ncol = 4, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   labs(title="Average Annual ER Visits",
-       subtitle="By Race/Ethnicity and Highest Level of Education Attained",
+       subtitle="By Race/Ethnicity and Neighborhood Availability of Places to Buy Healthy Food",
        y = "Average annual ER visits per person",
-       x = "Highest Level of Education Attained",
+       x = "Self-rated Level of Neighborhood Availability of Places to Buy Healthy Food",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") + 
   guides(fill = "none")
 
-hsgrad_vs_ed.plot %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_ed.png", width = 11, height = 8.5)
+foodinsec_vs_ed.plot %>%
+  ggsave(file = "./outputs/charts/foodinsec_vs_ed.png", width = 11, height = 8.5)
 
-## High school education and ED util broken out by Chronic Cond. Status
+## Food insecurity and ED util broken out by Chronic Cond. Status
 
-hsgrad_vs_ed_CC.data <- fyc21_extended %>% 
+foodinsec_vs_ed_CC.data <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(HDDX_DSC, DIABDX_DSC, HIDEG_DSC) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_mean(ERTOT21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
-  filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
+  filter(SDHLTHFOOD_DSC_2 != "N/A or Undeterminable") %>% 
   filter(HDDX_DSC != "Unknown or Inapplicable" & DIABDX_DSC != "Unknown or Inapplicable") %>%
-  write_csv(file="./outputs/data/hsgrad_vs_ed_CC.csv")
+  write_csv(file="./outputs/data/foodinsec_vs_ed_CC.csv")
 
-hsgrad_vs_ed_CC.plot <- hsgrad_vs_ed_CC.data %>% 
-  ggplot(mapping = aes(x = HIDEG_DSC,
-                       fill = HIDEG_DSC,
+foodinsec_vs_ed_CC.plot <- foodinsec_vs_ed_CC.data %>% 
+  ggplot(mapping = aes(x = SDHLTHFOOD_DSC_2,
+                       fill = SDHLTHFOOD_DSC_2,
                        y = n)) +
   scale_fill_viridis_d(begin = 0.75, end = 0) +
   geom_bar(stat="identity", position="dodge", alpha = .75) +
@@ -380,50 +383,50 @@ hsgrad_vs_ed_CC.plot <- hsgrad_vs_ed_CC.data %>%
   facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   labs(title="Average Annual ER Visits",
-       subtitle="By Select Chronic Condition Diagnosis and Highest Level of Education Attained",
+       subtitle="By Select Chronic Condition Diagnosis and Neighborhood Availability of Places to Buy Healthy Food",
        y = "Average annual ER visits per person",
-       x = "Highest Level of Education Attained",
+       x = "Self-rated Level of Neighborhood Availability of Places to Buy Healthy Food",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") + 
   guides(fill = "none")
 
-hsgrad_vs_ed_CC.plot %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_ed_CC.png", width = 11, height = 8.5)
+foodinsec_vs_ed_CC.plot %>%
+  ggsave(file = "./outputs/charts/foodinsec_vs_ed_CC.png", width = 11, height = 8.5)
 
-## High school education vs. IP admits
-hsgrad_vs_ip_all <- fyc21_extended %>% 
+## Food insecurity vs. IP admits
+foodinsec_vs_ip_all <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(HIDEG_DSC) %>% 
+  group_by(SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_mean(IPNGTD21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
   mutate(RACETHX_DSC = "All Race/Ethnicity Groups") %>%
-  relocate(RACETHX_DSC, .before=HIDEG_DSC) 
+  relocate(RACETHX_DSC, .before=SDHLTHFOOD_DSC_2) 
 
-hsgrad_vs_ip.data <- fyc21_extended %>% 
+foodinsec_vs_ip.data <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(RACETHX_DSC, HIDEG_DSC) %>% 
+  group_by(RACETHX_DSC, SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_mean(IPNGTD21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
-  union_all(hsgrad_vs_ip_all) %>%
-  filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
+  union_all(foodinsec_vs_ip_all) %>%
+  filter(SDHLTHFOOD_DSC_2 != "N/A or Undeterminable") %>% 
   filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
-  write_csv(file="./outputs/data/hsgrad_vs_ip.csv")
+  write_csv(file="./outputs/data/foodinsec_vs_ip.csv")
 
-hsgrad_vs_ip.plot <- hsgrad_vs_ip.data %>% 
-  ggplot(mapping = aes(x = HIDEG_DSC,
+foodinsec_vs_ip.plot <- foodinsec_vs_ip.data %>% 
+  ggplot(mapping = aes(x = SDHLTHFOOD_DSC_2,
                        fill = RACETHX_DSC,
                        y = n)) +
   scale_fill_viridis_d(begin = 0.75, end = 0) +
@@ -435,37 +438,37 @@ hsgrad_vs_ip.plot <- hsgrad_vs_ip.data %>%
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   facet_wrap(~ RACETHX_DSC, ncol = 4, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   labs(title="Average Number of Days Spent in an Inpatient Facility",
-       subtitle="By Race/Ethnicity and Highest Level of Education Attained",
+       subtitle="By Race/Ethnicity and Neighborhood Availability of Places to Buy Healthy Food",
        y = "Average inpatient days per person",
-       x = "Highest Level of Education Attained",
+       x = "Self-rated Level of Neighborhood Availability of Places to Buy Healthy Food",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
-hsgrad_vs_ip.plot  %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_ip.png", width = 11, height = 8.5)
+foodinsec_vs_ip.plot  %>%
+  ggsave(file = "./outputs/charts/foodinsec_vs_ip.png", width = 11, height = 8.5)
 
-## High school education vs. IP admits by Chronic Cond.
-hsgrad_vs_ip_CC.data <- fyc21_extended %>% 
+## Food insecurity vs. IP admits by Chronic Cond.
+foodinsec_vs_ip_CC.data <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(HDDX_DSC, DIABDX_DSC, HIDEG_DSC) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_mean(IPNGTD21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>% 
   filter(rse <= .3) %>% 
-  filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
+  filter(SDHLTHFOOD_DSC_2 != "N/A or Undeterminable") %>% 
   filter(HDDX_DSC != "Unknown or Inapplicable" & DIABDX_DSC != "Unknown or Inapplicable") %>%
-  write_csv(file="./outputs/data/hsgrad_vs_ip_CC.csv")
+  write_csv(file="./outputs/data/foodinsec_vs_ip_CC.csv")
 
-hsgrad_vs_ip_CC.plot <- hsgrad_vs_ip_CC.data %>% 
-  ggplot(mapping = aes(x = HIDEG_DSC,
-                       fill = HIDEG_DSC,
+foodinsec_vs_ip_CC.plot <- foodinsec_vs_ip_CC.data %>% 
+  ggplot(mapping = aes(x = SDHLTHFOOD_DSC_2,
+                       fill = SDHLTHFOOD_DSC_2,
                        y = n)) +
   scale_fill_viridis_d(begin = 0.75, end = 0) +
   geom_bar(stat="identity", position="dodge", alpha = .75) +
@@ -476,50 +479,50 @@ hsgrad_vs_ip_CC.plot <- hsgrad_vs_ip_CC.data %>%
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   labs(title="Average Number of Days Spent in an Inpatient Facility",
-       subtitle="By Select Chronic Condition Diagnosis and Highest Level of Education Attained",
+       subtitle="By Select Chronic Condition Diagnosis and Neighborhood Availability of Places to Buy Healthy Food",
        y = "Average inpatient days per person",
-       x = "Highest Level of Education Attained",
+       x = "Self-rated Level of Neighborhood Availability of Places to Buy Healthy Food",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
-hsgrad_vs_ip_CC.plot  %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_ip_CC.png", width = 11, height = 8.5)
+foodinsec_vs_ip_CC.plot  %>%
+  ggsave(file = "./outputs/charts/foodinsec_vs_ip_CC.png", width = 11, height = 8.5)
 
-# High School Education vs. Total Cost of Care
-hsgrad_vs_totexp_all <- fyc21_extended %>% 
+# Food Insecurity vs. Total Cost of Care
+foodinsec_vs_totexp_all <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(HIDEG_DSC) %>% 
+  group_by(SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_median(TOTEXP21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>%
   filter(rse <= .3) %>% 
   mutate(RACETHX_DSC = "All Race/Ethnicity Groups") %>%
-  relocate(RACETHX_DSC, .before=HIDEG_DSC) 
+  relocate(RACETHX_DSC, .before=SDHLTHFOOD_DSC_2) 
 
-hsgrad_vs_totexp.data <- fyc21_extended %>% 
+foodinsec_vs_totexp.data <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(RACETHX_DSC, HIDEG_DSC) %>% 
+  group_by(RACETHX_DSC, SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_median(TOTEXP21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>%
   filter(rse <= .3) %>% 
-  union_all(hsgrad_vs_totexp_all) %>%
-  filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
+  union_all(foodinsec_vs_totexp_all) %>%
+  filter(SDHLTHFOOD_DSC_2 != "N/A or Undeterminable") %>% 
   filter(RACETHX_DSC != "Non-Hispanic Other Race or Multiple Race" & RACETHX_DSC != "Non-Hispanic Asian Only") %>%
-  write_csv(file="./outputs/data/hsgrad_vs_totexp.csv")
+  write_csv(file="./outputs/data/foodinsec_vs_totexp.csv")
 
-hsgrad_vs_totexp.plot <- hsgrad_vs_totexp.data %>% 
-  ggplot(mapping = aes(x = HIDEG_DSC,
+foodinsec_vs_totexp.plot <- foodinsec_vs_totexp.data %>% 
+  ggplot(mapping = aes(x = SDHLTHFOOD_DSC_2,
                        fill = RACETHX_DSC,
                        y = n)) +
   scale_fill_viridis_d(begin = 0.75, end = 0) +
@@ -531,38 +534,38 @@ hsgrad_vs_totexp.plot <- hsgrad_vs_totexp.data %>%
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   facet_wrap(~ RACETHX_DSC, ncol = 4, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   labs(title="Median Annual Individual Healthcare Expenditures",
-       subtitle="By Race/Ethnicity and Highest Level of Education Attained",
+       subtitle="By Race/Ethnicity and Neighborhood Availability of Places to Buy Healthy Food",
        y = "Median annual healthcare expenditures",
-       x = "Highest Level of Education Attained",
+       x = "Self-rated Level of Neighborhood Availability of Places to Buy Healthy Food",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
-hsgrad_vs_totexp.plot  %>%
-  ggsave(file = "./outputs/charts/hsgrad_vs_totexp.png", width = 11, height = 8.5)
+foodinsec_vs_totexp.plot  %>%
+  ggsave(file = "./outputs/charts/foodinsec_vs_totexp.png", width = 11, height = 8.5)
 
-# High School Education vs. Total Cost of Care by select Chronic Cond. Dx
+# Food Insecurity vs. Total Cost of Care by select Chronic Cond. Dx
 
-hsgrad_vs_totexp_CC.data <- fyc21_extended %>% 
+foodinsec_vs_totexp_CC.data <- fyc21_extended %>% 
   as_survey_design(
     ids = VARPSU,
     strata = VARSTR,
     weights = PERWT21F,
     nest = T) %>% 
   filter(PERWT21F > 0 & AGE21X >= 16) %>% 
-  group_by(HDDX_DSC, DIABDX_DSC, HIDEG_DSC) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDHLTHFOOD_DSC_2) %>% 
   summarize(n = survey_median(TOTEXP21, vartype = c("se", "ci"), level = 0.95)) %>% 
   mutate(rse = n_se / n) %>%
   filter(rse <= .3) %>% 
-  filter(HIDEG_DSC == "Did not complete high school" | HIDEG_DSC == "Completed GED or high school") %>% 
+  filter(SDHLTHFOOD_DSC_2 != "N/A or Undeterminable") %>% 
   filter(HDDX_DSC != "Unknown or Inapplicable" & DIABDX_DSC != "Unknown or Inapplicable") %>%
-  write_csv(file="./outputs/data/hsgrad_vs_totexp_CC.csv")
+  write_csv(file="./outputs/data/foodinsec_vs_totexp_CC.csv")
 
-hsgrad_vs_totexp_CC.plot <- hsgrad_vs_totexp_CC.data %>% 
-  ggplot(mapping = aes(x = HIDEG_DSC,
-                       fill = HIDEG_DSC,
+foodinsec_vs_totexp_CC.plot <- foodinsec_vs_totexp_CC.data %>% 
+  ggplot(mapping = aes(x = SDHLTHFOOD_DSC_2,
+                       fill = SDHLTHFOOD_DSC_2,
                        y = n)) +
   scale_fill_viridis_d(begin = 0.75, end = 0) +
   geom_bar(stat="identity", position="dodge", alpha = .75) +
@@ -573,15 +576,15 @@ hsgrad_vs_totexp_CC.plot <- hsgrad_vs_totexp_CC.data %>%
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   labs(title="Median Annual Individual Healthcare Expenditures",
-       subtitle="By Select Chronic Condition Diagnosis and Highest Level of Education Attained",
+       subtitle="By Select Chronic Condition Diagnosis and Neighborhood Availability of Places to Buy Healthy Food",
        y = "Median annual healthcare expenditures",
-       x = "Highest Level of Education Attained",
+       x = "Self-rated Level of Neighborhood Availability of Places to Buy Healthy Food",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
                   Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
-hsgrad_vs_totexp_CC.plot  %>%
+foodinsec_vs_totexp_CC.plot  %>%
   ggsave(file = "./outputs/charts/hsgrad_vs_totexp_CC.png", width = 11, height = 8.5)
 
  

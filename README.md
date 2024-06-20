@@ -7,6 +7,7 @@ Due to sample sizes which are insufficient (n < 60, per [MEPS precision standard
 * [HS Graduation](outputs/data/sample_size_check_hsgrad.csv)
 * [Transit Availability](outputs/data/sample_size_check_transit.csv)
 * [Affordable Housing](outputs/data/sample_size_check_housing.csv)
+* [Food Insecurity](outputs/data/sample_size_check_foodinsec.csv)
 
 
 The work in this repository constitutes my own work and assertions and should not be considered associated, affiliated, or blessed in any way by my employer, which did not review this code or the results in the slightest before I put them on this repository. I make no guarantee of the accuracy of these results. You are free to use these results for any project, but you do so at your own risk.
@@ -79,3 +80,25 @@ The work in this repository constitutes my own work and assertions and should no
 
 ![image](outputs/charts/housing_vs_totexp_CC.png)
 [Supporting data](outputs/data/housing_vs_totexp_CC.csv)
+
+## Availability of Neighborhood Places to Buy Healthy Food
+![image](outputs/charts/foodinsec_vs_genhealth.png)
+[Supporting data](outputs/data/foodinsec_vs_genhealth.csv)
+
+![image](outputs/charts/foodinsec_vs_ip.png)
+[Supporting data](outputs/data/foodinsec_vs_ip.csv)
+
+![image](outputs/charts/foodinsec_vs_ip_CC.png)
+[Supporting data](outputs/data/foodinsec_vs_ip_CC.csv)
+
+![image](outputs/charts/foodinsec_vs_ed.png)
+[Supporting data](outputs/data/foodinsec_vs_ed.csv)
+
+![image](outputs/charts/foodinsec_vs_ed_CC.png)
+[Supporting data](outputs/data/foodinsec_vs_ed_CC.csv)
+
+![image](outputs/charts/foodinsec_vs_totexp.png)
+[Supporting data](outputs/data/foodinsec_vs_totexp.csv)
+
+![image](outputs/charts/foodinsec_vs_totexp_CC.png)
+[Supporting data](outputs/data/foodinsec_vs_totexp_CC.csv)
