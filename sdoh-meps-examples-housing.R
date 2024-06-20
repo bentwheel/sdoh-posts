@@ -280,15 +280,15 @@ housing_vs_genhealth.plot <- housing_vs_genhealth.data %>%
   facet_grid(GENHLTH_SIMPLE ~ RACETHX_DSC, scales="free_y", labeller = label_wrap_gen(width = 20, multi_line = TRUE)) +
   labs(title="Self-Reported General Health Status vs. Rated Access to Affordable Housing",
        subtitle="By Race and Ethnicity",
-       y = "Estimated Proportion",
+       y = "estimate",
        x = "Rated neighborhood access to affordable housing",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
 housing_vs_genhealth.plot %>%
-  ggsave(file = "./outputs/charts/housing_vs_genhealth.png", width = 10)
+  ggsave(file = "./outputs/charts/housing_vs_genhealth.png", width = 11, height = 8.5)
 
 ## Transit hardships vs. ED / IP utils
 housing_vs_ed_all <- fyc21_extended %>% 
@@ -339,13 +339,53 @@ housing_vs_ed.plot <- housing_vs_ed.data %>%
        x = "Access to Affordable Housing",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") + 
   guides(fill = "none")
 
 housing_vs_ed.plot %>%
-  ggsave(file = "./outputs/charts/housing_vs_ed.png", width = 10)
+  ggsave(file = "./outputs/charts/housing_vs_ed.png", width = 11, height = 8.5)
 
+## Transit hardships vs. ED utils by select Chronic Cond. DX
+
+housing_vs_ed_CC.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDAFRDHOME_DSC_2) %>% 
+  summarize(n = survey_mean(ERTOT21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
+  filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
+  filter(HDDX_DSC != "Unknown or Inapplicable" & DIABDX_DSC != "Unknown or Inapplicable") %>%
+  write_csv(file="./outputs/data/housing_vs_ed_CC.csv")
+
+housing_vs_ed_CC.plot <- housing_vs_ed_CC.data %>% 
+  ggplot(mapping = aes(x = SDAFRDHOME_DSC_2,
+                       fill = SDAFRDHOME_DSC_2,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::comma) +
+  facet_grid(HDDX_DSC~DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  labs(title="Average Annual ER Visits",
+       subtitle="By Select Chronic Condition Diagnosis and Access to Affordable Housing",
+       y = "Average annual ER visits per person",
+       x = "Access to Affordable Housing",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
+  theme(legend.position = "bottom") + 
+  guides(fill = "none")
+
+housing_vs_ed_CC.plot %>%
+  ggsave(file = "./outputs/charts/housing_vs_ed_CC.png", width = 11, height = 8.5)
 
 ## Housing vs. IP admits
 housing_vs_ip_all <- fyc21_extended %>% 
@@ -396,12 +436,52 @@ housing_vs_ip.plot <- housing_vs_ip.data %>%
        x = "Access to Affordable Housing",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
 housing_vs_ip.plot  %>%
-  ggsave(file = "./outputs/charts/housing_vs_ip.png", width = 10)
+  ggsave(file = "./outputs/charts/housing_vs_ip.png", width = 11, height = 8.5)
+
+## Housing vs. IP admits by Select Chronic Cond. DX
+housing_vs_ip_CC.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDAFRDHOME_DSC_2) %>% 
+  summarize(n = survey_mean(IPNGTD21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>% 
+  filter(rse <= .3) %>% 
+  filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
+  filter(HDDX_DSC != "Unknown or Inapplicable" & DIABDX_DSC != "Unknown or Inapplicable") %>%
+  write_csv(file="./outputs/data/housing_vs_ip_CC.csv")
+
+housing_vs_ip_CC.plot <- housing_vs_ip_CC.data %>% 
+  ggplot(mapping = aes(x = SDAFRDHOME_DSC_2,
+                       fill = SDAFRDHOME_DSC_2,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_grid(HDDX_DSC~ DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Average Number of Days Spent in an Inpatient Facility",
+       subtitle="By Select Chronic Condition Diagnosis and Access to Affordable Housing",
+       y = "Average inpatient days per person",
+       x = "Access to Affordable Housing",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+housing_vs_ip_CC.plot  %>%
+  ggsave(file = "./outputs/charts/housing_vs_ip_CC.png", width = 11, height = 8.5)
 
 # Housing vs. Total Cost of Care
 housing_vs_totexp_all <- fyc21_extended %>% 
@@ -451,9 +531,49 @@ housing_vs_totexp.plot <- housing_vs_totexp.data %>%
        x = "Access to Affordable Housing",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
 housing_vs_totexp.plot %>%
-  ggsave(file = "./outputs/charts/housing_vs_totexp.png", width = 10)
+  ggsave(file = "./outputs/charts/housing_vs_totexp.png", width = 11, height = 8.5)
+
+# Housing vs. Total Cost of Care by select CC DX
+housing_vs_totexp_CC.data <- fyc21_extended %>% 
+  as_survey_design(
+    ids = VARPSU,
+    strata = VARSTR,
+    weights = PERWT21F,
+    nest = T) %>% 
+  filter(PERWT21F > 0 & AGE21X >= 16) %>% 
+  group_by(HDDX_DSC, DIABDX_DSC, SDAFRDHOME_DSC_2) %>% 
+  summarize(n = survey_median(TOTEXP21, vartype = c("se", "ci"), level = 0.95)) %>% 
+  mutate(rse = n_se / n) %>%
+  filter(rse <= .3) %>% 
+  filter(SDAFRDHOME_DSC_2 != "N/A or Undeterminable") %>%
+  write_csv(file="./outputs/data/housing_vs_totexp_CC.csv")
+
+housing_vs_totexp_CC.plot <- housing_vs_totexp_CC.data %>% 
+  ggplot(mapping = aes(x = SDAFRDHOME_DSC_2,
+                       fill = SDAFRDHOME_DSC_2,
+                       y = n)) +
+  scale_fill_viridis_d(begin = 0.75, end = 0) +
+  geom_bar(stat="identity", position="dodge", alpha = .75) +
+  geom_errorbar(aes(ymin=n_low, ymax=n_upp), width=.2,
+                position=position_dodge(.9)) +
+  theme_bw() +
+  scale_y_continuous(labels = scales::dollar) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
+  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  labs(title="Median Annual Individual Healthcare Expenditures",
+       subtitle="By Select Chronic Condition Diagnosis and Access to Affordable Housing",
+       y = "Median annual healthcare expenditures",
+       x = "Access to Affordable Housing",
+       caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
+  theme(legend.position = "bottom") +
+  guides(fill = "none")
+
+housing_vs_totexp_CC.plot %>%
+  ggsave(file = "./outputs/charts/housing_vs_totexp_CC.png", width = 11, height = 8.5)
+

@@ -227,7 +227,7 @@ sample_size_check_hsgrad <-  fyc21_extended %>%
 ## High School Graduation vs. Health
 # Faceted on HS diploma or not
 # X axis is "Are you in good health?"
-# Y axis is estimated proportion based on SAQ weight, SAQWT21F, to provide population-representative estimates
+# Y axis is estimate based on SAQ weight, SAQWT21F, to provide population-representative estimates
 
 hsgrad_vs_genhealth_all <- fyc21_extended %>% 
   as_survey_design(
@@ -282,11 +282,11 @@ hsgrad_vs_genhealth.plot <- hsgrad_vs_genhealth.data %>%
   facet_grid(GENHLTH_SIMPLE ~ RACETHX_DSC, scales="free_y", labeller = label_wrap_gen(width = 20, multi_line = TRUE)) +
   labs(title="Self-Reported General Health Status vs. Highest Level of Education Attained",
        subtitle="By Race and Ethnicity",
-       y = "Estimated Proportion",
+       y = "estimate",
        fill = "Highest Level of Education Attained",
        x = "Highest Level of Education Attained",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
@@ -343,7 +343,7 @@ hsgrad_vs_ed.plot <- hsgrad_vs_ed.data %>%
        x = "Highest Level of Education Attained",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") + 
   guides(fill = "none")
 
@@ -377,14 +377,14 @@ hsgrad_vs_ed_CC.plot <- hsgrad_vs_ed_CC.data %>%
                 position=position_dodge(.9)) +
   theme_bw() +
   scale_y_continuous(labels = scales::comma) +
-  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
   labs(title="Average Annual ER Visits",
        subtitle="By Select Chronic Condition Diagnosis and Highest Level of Education Attained",
        y = "Average annual ER visits per person",
        x = "Highest Level of Education Attained",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") + 
   guides(fill = "none")
 
@@ -440,7 +440,7 @@ hsgrad_vs_ip.plot <- hsgrad_vs_ip.data %>%
        x = "Highest Level of Education Attained",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
@@ -474,13 +474,13 @@ hsgrad_vs_ip_CC.plot <- hsgrad_vs_ip_CC.data %>%
   theme_bw() +
   scale_y_continuous(labels = scales::comma) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
-  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   labs(title="Average Number of Days Spent in an Inpatient Facility",
        subtitle="By Select Chronic Condition Diagnosis and Highest Level of Education Attained",
        y = "Average inpatient days per person",
        x = "Highest Level of Education Attained",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
@@ -536,7 +536,7 @@ hsgrad_vs_totexp.plot <- hsgrad_vs_totexp.data %>%
        x = "Highest Level of Education Attained",
        fill = "Race/Ethnicity",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
@@ -571,13 +571,13 @@ hsgrad_vs_totexp_CC.plot <- hsgrad_vs_totexp_CC.data %>%
   theme_bw() +
   scale_y_continuous(labels = scales::dollar) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 12)) +
-  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="free_y", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
+  facet_grid(HDDX_DSC ~ DIABDX_DSC, scales="fixed", labeller = label_wrap_gen(width = 36, multi_line = TRUE)) +
   labs(title="Median Annual Individual Healthcare Expenditures",
        subtitle="By Select Chronic Condition Diagnosis and Highest Level of Education Attained",
        y = "Median annual healthcare expenditures",
        x = "Highest Level of Education Attained",
        caption = "Source: MEPS 2021 Full Year Consolidated Data File (https://meps.ahrq.gov/).\n
-                  Error bars denote a 95% confidence interval around the corresponding estimated proportion.") +
+                  Error bars denote a 95% confidence interval around the corresponding estimate.") +
   theme(legend.position = "bottom") +
   guides(fill = "none")
 
